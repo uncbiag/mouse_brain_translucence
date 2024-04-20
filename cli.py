@@ -1,6 +1,8 @@
 import itk
 import os
 from datetime import datetime
+from pathlib import Path
+import ngff_zarr
 
 import footsteps
 import numpy as np
@@ -52,13 +54,26 @@ if __name__ == "__main__":
     parser.add_argument("--moving")
     parser.add_argument("--transform_out")
     parser.add_argument("--warped_moving_out", default=None)
+    parser.add_argument("--scale", type=int, default=0)
 
     args = parser.parse_args()
 
     net = get_model()
 
-    fixed = itk.imread(args.fixed)
-    moving = itk.imread(args.moving)
+    fixed_path = Path(args.fixed)
+    if fixed_path.suffix == '.zarr':
+        multiscales = ngff_zarr.from_ngff_zarr(fixed_path)
+        ngff_image = multiscales.images[args.scale]
+        fixed = ngff_zarr.ngff_image_to_itk_image(ngff_image, wasm=False)
+    else:
+        fixed = itk.imread(args.fixed)
+    moving_path = Path(args.moving)
+    if moving_path.suffix == '.zarr':
+        multiscales = ngff_zarr.from_ngff_zarr(moving_path)
+        ngff_image = multiscales.images[args.scale]
+        moving = ngff_zarr.ngff_image_to_itk_image(ngff_image, wasm=False)
+    else:
+        moving = itk.imread(args.moving)
 
     phi_AB, phi_BA = icon_registration.itk_wrapper.register_pair(net,preprocess(moving), preprocess(fixed), finetune_steps=50)
 

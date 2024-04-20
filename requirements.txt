@@ -1,1 +1,2 @@
 icon_registration
+ngff_zarr[cli]
