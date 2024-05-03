@@ -1,4 +1,9 @@
 ```
+# Create a virtual environment using either venv or conda. For example, 
+python3 -m venv constricon_venv
+source constricon_venv/bin/activate
+
+# Install and use the software
 pip install unigradicon
 git clone https://github.com/uncbiag/mouse_brain_translucence
 
